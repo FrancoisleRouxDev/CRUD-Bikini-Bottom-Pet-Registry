@@ -1,18 +1,18 @@
 import { View, Text, StyleSheet } from "react-native";
 
-export default function DogCard({ dog }) {
+export default function PetCard({ Pet }) {
   return (
     <View style={styles.card}>
       <Text style={styles.name}>
-        {dog.name}
+        {Pet.name}
       </Text>
 
       <Text>
-        Breed: {dog.breed}
+        Breed: {Pet.breed}
       </Text>
 
       <Text>
-        Age: {dog.age}
+        Age: {Pet.age}
       </Text>
     </View>
   );
