@@ -1,107 +1,137 @@
-import React, { useState } from 'react';
+import { useState } from "react";
+
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   StyleSheet,
   Alert,
-} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import PetForm from '../components/PetForm';
+  ScrollView,
+} from "react-native";
 
-const EditPetScreen = ({ route }) => {
-  const [imageUri, setImageUri] = useState(null);
+import {
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 
-  const pickImage = async () => {
-    // Request permission
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
+import { db } from "../firebase";
+import PetForm from "../components/PetForm";
+
+export default function EditPetScreen({
+  navigation,
+  route,
+}) {
+  const { pet } = route.params;
+
+  const [name, setName] = useState(pet.name);
+  const [breed, setBreed] = useState(pet.breed);
+  const [age, setAge] = useState(String(pet.age));
+  const [saving, setSaving] = useState(false);
+
+  const handleUpdate = async () => {
+    if (!name || !breed || !age) {
       Alert.alert(
-        'Permission required',
-        'Sorry, we need camera roll permissions to pick an image.'
+        "Missing Information",
+        "Please complete all fields."
       );
       return;
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+    try {
+      setSaving(true);
 
-    if (!result.canceled) {
-      setImageUri(result.assets[0].uri);
+      await updateDoc(
+        doc(db, "pets", pet.id),
+        {
+          name: name.trim(),
+          breed: breed.trim(),
+          age: Number(age),
+        }
+      );
+
+      Alert.alert(
+        "Updated!",
+        `${name}'s profile has been updated.`
+      );
+
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert(
+        "Update Failed",
+        error.message
+      );
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>🐕 Edit Pet</Text>
+    <ScrollView style={styles.container}>
+      <View style={styles.content}>
+        <Text style={styles.title}>
+          ✏️ Edit Pet
+        </Text>
 
-      {/* Image Picker */}
-      <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
-        {imageUri ? (
-          <Image source={{ uri: imageUri }} style={styles.image} />
-        ) : (
-          <View style={styles.placeholder}>
-            <Text style={styles.placeholderText}>📷 Tap to add photo</Text>
-          </View>
-        )}
-      </TouchableOpacity>
+        <View style={styles.card}>
+          <PetForm
+            name={name}
+            setName={setName}
+            breed={breed}
+            setBreed={setBreed}
+            age={age}
+            setAge={setAge}
+          />
 
-      {/* Pass imageUri to PetForm so it can be saved */}
-      <PetForm imageUri={imageUri} />
-    </View>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleUpdate}
+            disabled={saving}
+          >
+            <Text style={styles.buttonText}>
+              {saving ? "Saving..." : "Save Changes"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#F7E8A4",
+  },
+
+  content: {
     padding: 20,
-    backgroundColor: '#F5DEB3', // Sandy
   },
-  header: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#FF69B4', // Pink
-    textAlign: 'center',
-    marginBottom: 20,
-    textShadowColor: '#000',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+
+  title: {
+    fontSize: 30,
+    fontWeight: "bold",
+    color: "#005F99",
+    textAlign: "center",
+    marginVertical: 25,
   },
-  imagePicker: {
-    alignSelf: 'center',
-    marginBottom: 20,
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    backgroundColor: '#FFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#00A3E0', // Blue
-    overflow: 'hidden',
+
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 20,
+    elevation: 4,
   },
-  image: {
-    width: '100%',
-    height: '100%',
+
+  button: {
+    backgroundColor: "#00AEEF",
+    padding: 16,
+    borderRadius: 12,
+    alignItems: "center",
   },
-  placeholder: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#E8E8E8',
-  },
-  placeholderText: {
-    color: '#888',
-    fontSize: 14,
-    textAlign: 'center',
+
+  buttonText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
-
-export default EditPetScreen;

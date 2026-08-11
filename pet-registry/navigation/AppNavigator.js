@@ -3,9 +3,10 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
+import RegistryScreen from "../screens/RegistryScreen";
+import AddPetScreen from "../screens/AddPetScreen";
 import PetProfileScreen from "../screens/PetProfileScreen";
 import EditPetScreen from "../screens/EditPetScreen";
-import RegistryScreen from "../screens/RegistryScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -13,10 +14,10 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        screenOptions={{ 
-          headerShown: false
-        }}
         initialRouteName="Login"
+        screenOptions={{
+          headerShown: false,
+        }}
       >
         <Stack.Screen
           name="Login"
@@ -29,6 +30,16 @@ export default function AppNavigator() {
         />
 
         <Stack.Screen
+          name="Registry"
+          component={RegistryScreen}
+        />
+
+        <Stack.Screen
+          name="Add Pet"
+          component={AddPetScreen}
+        />
+
+        <Stack.Screen
           name="Pet Profile"
           component={PetProfileScreen}
         />
@@ -36,11 +47,6 @@ export default function AppNavigator() {
         <Stack.Screen
           name="Edit Pet"
           component={EditPetScreen}
-        />
-
-        <Stack.Screen
-          name="Registry"
-          component={RegistryScreen}
         />
       </Stack.Navigator>
     </NavigationContainer>

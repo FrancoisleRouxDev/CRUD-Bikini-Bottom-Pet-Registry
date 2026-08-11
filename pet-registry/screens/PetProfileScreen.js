@@ -1,48 +1,121 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from "react-native";
 
-export default function PetProfileScreen({ navigation }) {
-  // In a real app, this would come from route params or context
-  const Pet = {
-    name: 'Buddy',
-    breed: 'Golden Retriever',
-    age: 3,
-    image: null, // replace with a valid URI if you have one
+import {
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
+
+import { db } from "../firebase";
+
+export default function PetProfileScreen({
+  navigation,
+  route,
+}) {
+  const { pet } = route.params;
+
+  const handleDelete = () => {
+    Alert.alert(
+      "Remove Pet",
+      `Are you sure you want to remove ${pet.name} from the registry?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteDoc(
+                doc(db, "pets", pet.id)
+              );
+
+              navigation.goBack();
+            } catch (error) {
+              Alert.alert(
+                "Error",
+                error.message
+              );
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        {/* Pet Image */}
         <View style={styles.imageContainer}>
-          {Pet.image ? (
-            <Image source={{ uri: Pet.image }} style={styles.image} />
+          {pet.image ? (
+            <Image
+              source={{ uri: pet.image }}
+              style={styles.image}
+            />
           ) : (
-            <View style={styles.placeholder}>
-              <Text style={styles.placeholderText}>🐾</Text>
-            </View>
+            <Text style={styles.placeholder}>
+              🐾
+            </Text>
           )}
         </View>
 
-        <Text style={styles.name}>{Pet.name}</Text>
-        <Text style={styles.detail}>Breed: {Pet.breed}</Text>
-        <Text style={styles.detail}>Age: {Pet.age} years</Text>
+        <Text style={styles.name}>
+          {pet.name}
+        </Text>
 
-        <View style={styles.buttonContainer}>
+        <Text style={styles.breed}>
+          {pet.breed}
+        </Text>
+
+        <View style={styles.detailBox}>
+          <Text style={styles.detailLabel}>
+            AGE
+          </Text>
+
+          <Text style={styles.detailValue}>
+            {pet.age} years old
+          </Text>
+        </View>
+
+        <View style={styles.buttons}>
           <TouchableOpacity
-            style={[styles.button, styles.editButton]}
-            onPress={() => navigation.navigate('Edit Pet')}
+            style={styles.editButton}
+            onPress={() =>
+              navigation.navigate("Edit Pet", {
+                pet,
+              })
+            }
           >
-            <Text style={styles.buttonText}>✏️ Edit Pet</Text>
+            <Text style={styles.buttonText}>
+              ✏️ Edit
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, styles.backButton]}
-            onPress={() => navigation.goBack()}
+            style={styles.deleteButton}
+            onPress={handleDelete}
           >
-            <Text style={styles.buttonText}>⬅️ Go Back</Text>
+            <Text style={styles.buttonText}>
+              🗑️ Delete
+            </Text>
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.backText}>
+            ← Back to Registry
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -51,81 +124,107 @@ export default function PetProfileScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#87CEEB",
+    justifyContent: "center",
     padding: 20,
-    backgroundColor: '#87CEEB', // Sky blue
   },
+
   card: {
-    width: '100%',
-    backgroundColor: '#FFF',
-    borderRadius: 20,
-    padding: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 25,
+    padding: 25,
+    alignItems: "center",
+    elevation: 6,
   },
+
   imageContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#F0F0F0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 15,
-    borderWidth: 3,
-    borderColor: '#FFE135', // Yellow
-    overflow: 'hidden',
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: "#FFF1A8",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 18,
+    borderWidth: 4,
+    borderColor: "#FFE135",
+    overflow: "hidden",
   },
+
   image: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
+
   placeholder: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+    fontSize: 55,
   },
-  placeholderText: {
-    fontSize: 40,
-  },
+
   name: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FF69B4', // Pink
-    marginBottom: 5,
+    fontSize: 32,
+    fontWeight: "bold",
+    color: "#005F99",
   },
-  detail: {
+
+  breed: {
     fontSize: 18,
-    color: '#333',
-    marginVertical: 2,
+    color: "#555",
+    marginTop: 5,
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
+
+  detailBox: {
+    backgroundColor: "#F2FAFD",
+    width: "100%",
+    borderRadius: 15,
+    padding: 15,
+    alignItems: "center",
     marginTop: 20,
   },
-  button: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 30,
-    minWidth: 100,
-    alignItems: 'center',
+
+  detailLabel: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#0096C7",
+    letterSpacing: 2,
   },
+
+  detailValue: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginTop: 5,
+  },
+
+  buttons: {
+    flexDirection: "row",
+    width: "100%",
+    gap: 10,
+    marginTop: 20,
+  },
+
   editButton: {
-    backgroundColor: '#00A3E0', // Blue
+    flex: 1,
+    backgroundColor: "#00AEEF",
+    padding: 14,
+    borderRadius: 12,
+    alignItems: "center",
   },
-  backButton: {
-    backgroundColor: '#FF6347', // Tomato
+
+  deleteButton: {
+    flex: 1,
+    backgroundColor: "#E85D5D",
+    padding: 14,
+    borderRadius: 12,
+    alignItems: "center",
   },
+
   buttonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: "#FFFFFF",
+    fontWeight: "bold",
+  },
+
+  backText: {
+    color: "#005F99",
+    fontWeight: "600",
+    marginTop: 20,
   },
 });

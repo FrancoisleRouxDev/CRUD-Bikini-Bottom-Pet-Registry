@@ -1,13 +1,13 @@
-import React from "react";
 import {
   View,
+  Text,
   TextInput,
   StyleSheet,
 } from "react-native";
 
 export default function PetForm({
-  petName,
-  setPetName,
+  name,
+  setName,
   breed,
   setBreed,
   age,
@@ -15,22 +15,28 @@ export default function PetForm({
 }) {
   return (
     <View>
+      <Text style={styles.label}>Pet Name</Text>
+
       <TextInput
-        placeholder="Pet Name"
-        value={petName}
-        onChangeText={setPetName}
+        placeholder="e.g. Gary"
+        value={name}
+        onChangeText={setName}
         style={styles.input}
       />
 
+      <Text style={styles.label}>Breed</Text>
+
       <TextInput
-        placeholder="Breed"
+        placeholder="e.g. Golden Retriever"
         value={breed}
         onChangeText={setBreed}
         style={styles.input}
       />
 
+      <Text style={styles.label}>Age</Text>
+
       <TextInput
-        placeholder="Age"
+        placeholder="e.g. 3"
         value={age}
         onChangeText={setAge}
         keyboardType="numeric"
@@ -41,10 +47,20 @@ export default function PetForm({
 }
 
 const styles = StyleSheet.create({
+  label: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#005F99",
+    marginBottom: 6,
+  },
+
   input: {
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
     padding: 15,
-    marginBottom: 15,
-    borderRadius: 10,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#B8DDEB",
+    fontSize: 16,
   },
 });
